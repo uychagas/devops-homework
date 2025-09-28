@@ -1,0 +1,79 @@
+{{- $appName := include "rails-app.name" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rails-app.fullname" . }}
+  labels: &labels
+    app: {{ include "rails-app.name" . }}
+  annotations:
+    {{- include "rails-app.annotations" . | nindent 8 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    {{ if eq .Values.deploymentStrategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.deploymentStrategy.maxSurge }}
+      maxUnavailable: {{ .Values.deploymentStrategy.maxUnavailable }}
+    {{ end }}
+    type: {{ .Values.deploymentStrategy.type }}
+  selector:
+    matchLabels:
+      app: {{ include "rails-app.name" . }}
+  template:
+    metadata:
+      annotations:
+        {{- include "rails-app.annotations" . | nindent 8 }}
+      labels:
+        <<: *labels
+    spec:
+      containers:
+        - name: rails-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: {{ include "ports.app.name" . }}
+          env:
+            {{- if .Values.env }}
+              {{- toYaml .Values.env | trimSuffix "\n" | nindent 12 }}
+            {{- end }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            {{- if .Values.resources.limits }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.healthCheck.livenessProbe.path }}
+              port: {{ include "ports.app.name" . }}
+          {{- include "rails-app.healthcheck" . | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.healthCheck.readinessProbe.path }}
+              port: {{ include "ports.app.name" . }}
+          {{- include "rails-app.healthcheck" . | nindent 12 }}
+          {{- if or .Values.secret.enabled }}
+          volumeMounts:
+            {{- if .Values.secret.enabled }}
+            {{- range .Values.secret.files }}
+              - name: {{ .name }}
+                mountPath: {{ .mountPath }}
+                subPath: {{ .filename }}
+                readOnly: {{ .readOnly }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+      {{- if or .Values.secret.enabled }}
+      volumes:
+        {{- if .Values.secret.enabled }}
+          {{- range .Values.secret.files }}
+        - name: {{ .name }}
+          secret:
+            secretName: '{{ $appName }}-{{ .name }}'
+          {{- end }}
+        {{- end }}
+      {{- end }}

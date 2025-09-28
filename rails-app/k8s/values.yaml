@@ -1,0 +1,37 @@
+replicaCount: 2
+
+image:
+  repository: rails-app
+  tag: latest
+  pullPolicy: IfNotPresent
+
+appDescription: "Rails App Hello World"
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 3000
+
+env:
+  - name: "RAILS_MASTER_KEY"
+    valueFrom:
+      secretKeyRef:
+        name: rails-app-master-key
+        key: master.key
+
+secret:
+  enabled: true
+  scope: backend
+  files:
+    - name: master-key
+      filename: master.key
+      mountPath: /rails/config/master.key
+      readOnly: true
+      content: "95f4ef866d1cbeb186d6ebea00936df9"
+
+ingress:
+  enabled: true
+  hosts:
+    - host: minikube.localhost
+      paths:
+        - /
