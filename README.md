@@ -28,25 +28,35 @@ Minimum tested versions:
 | Rails      | 8.0.3         |
 
 ## Quick start
-*ATTENTION*: This is a quick start guide and all commands should be run from the root of the project.
+>This is a quick start guide and all commands should be run from the project root folder.
+
+> Note: Terragrunt command to create infra performs actions that modify system files (for example, moving the minikube binary into /usr/local/bin, running a system tunnel, and appending to /etc/hosts).
+> That's why we run `sudo -v` before running it.
+
 
 ### Infra deploy
-It creates a local Minikube cluster and deploys the app to it.
+It creates a local Minikube cluster.
 
 ```bash
-terragrunt apply --config iac/infrastructure/minikube/terragrunt.hcl
+sudo -v && terragrunt apply --working-dir iac/infrastructure/minikube
 ```
 
 ### App deploy
 It deploys the rails app to the local Minikube cluster.
 ```bash
-eval $(minikube docker-env); terragrunt apply --config iac/infrastructure/app/terragrunt.hcl
+eval $(minikube docker-env) && terragrunt apply --config iac/infrastructure/app/terragrunt.hcl
+```
+
+### App destroy
+It deletes the rails app from the local Minikube cluster.
+```bash
+eval $(minikube docker-env) && terragrunt destroy --config iac/infrastructure/app/terragrunt.hcl
 ```
 
 ### Infra destroy
 It deletes the local Minikube cluster.
 ```bash
-terragrunt destroy --config iac/infrastructure/minikube/terragrunt.hcl
+sudo -v && terragrunt destroy --working-dir iac/infrastructure/minikube
 ```
 
 ---

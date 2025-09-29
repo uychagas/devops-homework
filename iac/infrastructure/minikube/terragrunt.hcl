@@ -1,5 +1,5 @@
 terraform {
-  source = "iac/terraform/blueprints/minikube"
+  source = "../../terraform/blueprints/minikube"
 }
 
 inputs = {
