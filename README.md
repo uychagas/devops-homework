@@ -27,26 +27,26 @@ Minimum tested versions:
 | Ruby       | 3.4.4         |
 | Rails      | 8.0.3         |
 
-## Quick start (local)
-All commands should be run from the root of the project.
+## Quick start
+*ATTENTION*: This is a quick start guide and all commands should be run from the root of the project.
 
 ### Infra deploy
 It creates a local Minikube cluster and deploys the app to it.
 
 ```bash
-$ cd iac/infrastructure/minikube; terragrunt apply
+terragrunt apply --config iac/infrastructure/minikube/terragrunt.hcl
 ```
 
 ### App deploy
 It deploys the rails app to the local Minikube cluster.
 ```bash
-$ eval $(minikube docker-env); terragrunt apply --config iac/infrastructure/app/terragrunt.hcl
+eval $(minikube docker-env); terragrunt apply --config iac/infrastructure/app/terragrunt.hcl
 ```
 
 ### Infra destroy
 It deletes the local Minikube cluster.
 ```bash
-$ cd iac/infrastructure/minikube; terragrunt destroy
+terragrunt destroy --config iac/infrastructure/minikube/terragrunt.hcl
 ```
 
 ---
