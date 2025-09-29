@@ -1,0 +1,100 @@
+# replicaCount -- Desired number of pods (ignored when autoscaling.enabled=true)
+replicaCount: 1
+
+image:
+  # image.repository -- Image name
+  repository: ""
+  # image.tag -- Image tag
+  tag: ""
+  # image.pullPolicy -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# nameOverride -- Overrides the release name
+nameOverride: ""
+# fullnameOverride -- Overrides the app full name
+fullnameOverride: ""
+# appDescription -- Application short description
+appDescription: ""
+
+deploymentStrategy:
+  # deploymentStrategy.maxSurge -- Maximum number of pods that can be created over the desired number of pods
+  maxSurge: 25%
+  # deploymentStrategy.maxUnavailable -- Maximum number of pods that can be unavailable during the update process
+  maxUnavailable: 25%
+  # deploymentStrategy.type -- Strategy used to replace old pods by new ones
+  type: RollingUpdate
+
+service:
+  # service.enabled -- Creates a service for the deployment
+  enabled: true
+  # service.type -- Service type (`LoadBalancer` or `NodePort`)
+  type: ClusterIP
+  # service.port -- Service port
+  port: 80
+  # service.nodePort -- Service node port. Optional field, applicable only if `service.type:` `NodePort`.
+  # By default and for convenience, if ommited, the Kubernetes control plane will allocate a port from a range (default: 30000-32767).
+  nodePort: ""
+  # service.protocol -- Service port protocol (`UDP` or `TCP`)
+  protocol: TCP
+
+ingress:
+  enabled: false
+  # ingress.className -- Ingress Class Name
+  className: nginx
+  # ingress.annotations -- Additional ingress annotations
+  annotations: {}
+  # ingress.hosts -- Which hosts will be used to forward traffic
+  hosts: []
+  #  - host: app.example.com
+  #    paths:
+  #      - /
+
+env: []
+  #  - name: "POD_NAME"
+  #    value: "metadata.name"
+
+# Add files as a secret
+secret:
+  # secret.enabled -- Create secrets with values
+  enabled: false
+  # secret.scope -- Add scope to secrets (web or backend)
+  scope: backend
+  files: []
+  #  - name: secretName
+  #    filename: filename.json
+  #    mountPath: foo/bar
+  #    readOnly: true
+  #    config:
+  #      key: value
+
+resources:
+  requests:
+    # resources.requests.cpu -- How much CPU a container is guaranteed to get
+    cpu: 100m
+    # resources.requests.memory -- How much memory a container is guaranteed to get
+    memory: 128Mi
+  limits:
+    # resources.limits.cpu -- How much CPU a container never goes above
+    cpu: 200m
+    # resources.limits.memory -- How much memory a container never goes above
+    memory: 256Mi
+
+healthCheck:
+  livenessProbe:
+    # healthCheck.livenessProbe.path -- Path for HTTP health checks when the application is running
+    path: /healthcheck
+    # healthCheck.livenessProbe.command -- Command line for health checks when the application is running
+    command: []
+  readinessProbe:
+    # healthCheck.readinessProbe.path -- Path for health checks during application startup
+    path: /healthcheck
+  # healthCheck.initialDelaySeconds -- Number of seconds before starting to perform health checks
+  initialDelaySeconds: 10
+  # healthCheck.periodSeconds -- How often (in seconds) to perform health checks
+  periodSeconds: 10
+  # healthCheck.timeoutSeconds -- Number of seconds after which a health check times out
+  timeoutSeconds: 5
+  # healthCheck.successThreshold -- Minimum consecutive successes for the check to be considered successful after having failed
+  successThreshold: 1
+  # healthCheck.failureThreshold -- Number of allowed failed checks before setting the pod as unhealthy
+  failureThreshold: 3
